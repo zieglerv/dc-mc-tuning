@@ -30,7 +30,7 @@ public class FitFunction implements FCNBase{
     }
          
     public double eval(double x, double[] par) {
-        double value = par[0]*(par[1]/Math.pow(x*x + par[2], 2) + par[3]/Math.pow( (1-x) + par[4], 2));
+        double value = par[0]+par[1]*x+par[2]*x*x+par[3]*x*x*x+par[4]*x*x*x*x;
         return value;
     }
 

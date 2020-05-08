@@ -16,13 +16,13 @@ public class FitLine extends Func1D{
     public int j;
     private FitFunction fc ;
     public FitLine() {
-        super("fcn", 0.0, 2.0);
+        super("fcn", 0.0, 1.0);
         fc = new FitFunction();
     }
     public static final int nPars = 5;
     private double[] par = new double[nPars];
     public FitLine(String name, int i, int j, MnUserParameters pars) {
-        super(name, 0.0, 2.0);
+        super(name, 0.0, 1.0);
         this.i = i;
         this.j = j;
         fc = new FitFunction();
@@ -37,7 +37,7 @@ public class FitLine extends Func1D{
     @Override
     public double evaluate(double x) { 
        
-        return par[0]*(par[1]/Math.pow(x*x + par[2], 2) + par[3]/Math.pow( (1-x) + par[4], 2));
+        return par[0]+par[1]*x+par[2]*x*x+par[3]*x*x*x+par[4]*x*x*x*x;
  
     }
 
