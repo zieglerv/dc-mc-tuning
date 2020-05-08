@@ -52,7 +52,7 @@ public class DocaSmearAnal extends AnalysisMonitor{
         this.init(false, "p0:p1:p2:p3:p4");
         outfile = new File("Files/ccdbConstants.txt");
         pw = new PrintWriter(outfile);
-        pw.printf("#& sector superlayer component v0 deltanm tmax distbeta delta_bfield_coefficient b1 b2 b3 b4 delta_T0 c1 c2 c3\n");
+        pw.printf("#& superlayer p0 p1 p2 p3 p4\n");
         
         String dir = ClasUtilsFile.getResourceDir("CLAS12DIR", "etc/bankdefs/hipo4");
         schemaFactory.initFromDirectory(dir);
@@ -74,7 +74,7 @@ public class DocaSmearAnal extends AnalysisMonitor{
     
     int nsl = 6;
 
-    public static double[] betaValues = new double[]{0.89, 0.91, 0.93, 0.95, 0.97, 0.99};
+    public static double[] betaValues = new double[]{0.7, 0.9};
     double betaBinHalfWidth = (betaValues[1]-betaValues[0])*0.5;
     public static int betaBins = betaValues.length;
     
@@ -108,7 +108,7 @@ public class DocaSmearAnal extends AnalysisMonitor{
         for (int i = 0; i < nsl; i++) {
             for(int k = 0; k<5; k++) { //pars
                 parsVsBeta.put(new Coordinate(i,k), new H1F("par "+k*1000+i, "superlayer" + (i + 1), 
-                        betaValues.length, betaValues[0]-(betaValues[1]-betaValues[0])/2, betaValues[betaValues.length-1]-(betaValues[1]-betaValues[0])/2));
+                        betaValues.length, betaValues[0]-(betaValues[1]-betaValues[0])/2, betaValues[betaValues.length-1]+(betaValues[1]-betaValues[0])/2));
             }
         }
         
@@ -183,7 +183,7 @@ public class DocaSmearAnal extends AnalysisMonitor{
             for (int k = 0; k < 5; k++) {
                 this.getAnalysisCanvas().getCanvas("Beta Dependence").cd(ik);
                 this.getAnalysisCanvas().getCanvas("Beta Dependence").draw(
-                        parsVsBeta.get(new Coordinate(i,k)));
+                        parsVsBeta.get(new Coordinate(i,k)), "E");
                 ik++;
             }
         }
@@ -234,7 +234,7 @@ public class DocaSmearAnal extends AnalysisMonitor{
         scanner = new MnScan((FCNBase) timResVsTrkDocaFit.get(new Coordinate(i,j)), 
                 timeResVsTrkDocaFitPars.get(new Coordinate(i,j)),2);
 	
-         System.out.println(" Ready to minimize..... ");
+        System.out.println(" Ready to minimize..... ");
         FunctionMinimum scanmin = scanner.minimize();
         for(int pi = 0; pi<5; pi++) 
                 System.out.println("scan par["+pi+"]="+timeResVsTrkDocaFitPars.get(new Coordinate(i,j)).value(pi));
@@ -247,7 +247,6 @@ public class DocaSmearAnal extends AnalysisMonitor{
         migrad.setCheckAnalyticalDerivatives(true);
         
         FunctionMinimum min ;
-        
         
         for(int it = 0; it<maxIter; it++) {
             
@@ -263,8 +262,8 @@ public class DocaSmearAnal extends AnalysisMonitor{
             //}
             System.err.println(min);
             for(int k = 0; k<5; k++) {
-                parsVsBeta.get(new Coordinate(i,k)).setBinContent(k, timeResVsTrkDocaFitPars.get(new Coordinate(i,j)).value(k));
-                parsVsBeta.get(new Coordinate(i,k)).setBinError(k, timeResVsTrkDocaFitPars.get(new Coordinate(i,j)).error(k));
+                parsVsBeta.get(new Coordinate(i,k)).setBinContent(j, timeResVsTrkDocaFitPars.get(new Coordinate(i,j)).value(k));
+                parsVsBeta.get(new Coordinate(i,k)).setBinError(j, timeResVsTrkDocaFitPars.get(new Coordinate(i,j)).error(k));
             }       
                     
         }
