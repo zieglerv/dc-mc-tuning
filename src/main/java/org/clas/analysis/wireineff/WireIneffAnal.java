@@ -666,7 +666,7 @@ public class WireIneffAnal extends AnalysisMonitor{
                     for (int j = 0; j < sector.length; j++) {
                         if (sector[j] == seg.get_Sector() && superlayerNum[j] == seg.get_Superlayer()) {
                             if (layerNum[j] == l + 1) {
-                                for (int wo = 0; wo < 2; wo++) {
+                                for (int wo = 0; wo < matchWireTightness; wo++) {
                                     if (Math.abs(trjWire - wire[j]) == wo) {
                                         matchedHits[wo][l] = (j + 1);
                                     }
@@ -675,10 +675,10 @@ public class WireIneffAnal extends AnalysisMonitor{
                         }
                     }
                     matchHits[l] = -1;
-                    for (int wo = 0; wo < 2; wo++) {
+                    for (int wo = 0; wo < matchWireTightness; wo++) {
                         if (matchedHits[wo][l] != -1) {
                             matchHits[l] = matchedHits[wo][l];
-                            wo = 2;
+                            wo = matchWireTightness;
                         }
                     }
                 }
@@ -689,7 +689,7 @@ public class WireIneffAnal extends AnalysisMonitor{
             }
         }
     }
-    
+    private int matchWireTightness = 1;
     private double stereo = FastMath.cos(Math.toRadians(6.));
     public List<Segment> get_Segments(List<FittedCluster> allClusters, DataEvent event, DCGeant4Factory DcDetector) {
         List<Segment> segList = new ArrayList<Segment>();

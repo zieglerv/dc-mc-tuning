@@ -30,8 +30,17 @@ public class FitFunction implements FCNBase{
     }
          
     public double eval(double x, double[] par) {
-        double value = par[0]+par[1]*x+par[2]*x*x+par[3]*x*x*x+par[4]*x*x*x*x;
-        return value;
+        double beta = DocaSmearAnal.betaValues[this.j];
+        double scale_factor = par[0];
+        double a1           = par[1];
+        double a2           = par[2];
+        double a3           = par[3];
+        double a4           = par[4];
+        
+        double doca_smearing  = 0.001*scale_factor * ( ( Math.sqrt (x*x + a1 * beta*beta) - x ) 
+                + a2 * Math.sqrt(x) + a3 * beta*beta  / (1 - x +a4) ) / DocaSmearAnal.v0[0][this.i];
+
+        return doca_smearing;
     }
 
     @Override

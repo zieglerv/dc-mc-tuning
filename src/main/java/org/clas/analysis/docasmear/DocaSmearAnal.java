@@ -35,6 +35,8 @@ import org.clas.analysis.Coordinate;
 import org.jlab.utils.groups.IndexedList;
 import org.jlab.utils.system.ClasUtilsFile;
 import org.clas.analysis.FitPanel;
+import org.clas.viewer.DocaSmearAnalViewer;
+import org.jlab.utils.groups.IndexedTable;
 /**
  *
  * @author ziegler
@@ -98,7 +100,8 @@ public class DocaSmearAnal extends AnalysisMonitor{
                 timeResVsTrkDocaProf.get(new Coordinate(i,j)).setMarkerColor(1);
                 tr.addDataSet(timeResVsTrkDocaProf.get(new Coordinate(i,j)), 0);
                 timeResVsTrkDocaFits.put(new Coordinate(i,j), new FitLine());
-               
+                timeResVsTrkDocaProf.get(new Coordinate(i,j)).setTitleX("norm. doca");
+                timeResVsTrkDocaProf.get(new Coordinate(i,j)).setTitleX("residual (cm)");
                 this.getDataGroup().add(tr, 0, i+1, j+1);
 
             }
@@ -109,6 +112,8 @@ public class DocaSmearAnal extends AnalysisMonitor{
             for(int k = 0; k<5; k++) { //pars
                 parsVsBeta.put(new Coordinate(i,k), new H1F("par "+k*1000+i, "superlayer" + (i + 1), 
                         betaValues.length, betaValues[0]-(betaValues[1]-betaValues[0])/2, betaValues[betaValues.length-1]+(betaValues[1]-betaValues[0])/2));
+                parsVsBeta.get(new Coordinate(i,k)).setTitleX("beta");
+                parsVsBeta.get(new Coordinate(i,k)).setTitleY("fit parameter "+i);
             }
         }
         
@@ -183,7 +188,7 @@ public class DocaSmearAnal extends AnalysisMonitor{
             for (int k = 0; k < 5; k++) {
                 this.getAnalysisCanvas().getCanvas("Beta Dependence").cd(ik);
                 this.getAnalysisCanvas().getCanvas("Beta Dependence").draw(
-                        parsVsBeta.get(new Coordinate(i,k)), "E");
+                        parsVsBeta.get(new Coordinate(i,k)).getGraph(), "E");
                 ik++;
             }
         }
@@ -233,7 +238,9 @@ public class DocaSmearAnal extends AnalysisMonitor{
         
         scanner = new MnScan((FCNBase) timResVsTrkDocaFit.get(new Coordinate(i,j)), 
                 timeResVsTrkDocaFitPars.get(new Coordinate(i,j)),2);
-	
+	//for (int p = 1; p < 5; p++) {
+        //    scanner.fix(p); 
+        //}
         System.out.println(" Ready to minimize..... ");
         FunctionMinimum scanmin = scanner.minimize();
         for(int pi = 0; pi<5; pi++) 
@@ -261,11 +268,7 @@ public class DocaSmearAnal extends AnalysisMonitor{
                 timeResVsTrkDocaFitPars.put(new Coordinate(i,j),min.userParameters());  
             //}
             System.err.println(min);
-            for(int k = 0; k<5; k++) {
-                parsVsBeta.get(new Coordinate(i,k)).setBinContent(j, timeResVsTrkDocaFitPars.get(new Coordinate(i,j)).value(k));
-                parsVsBeta.get(new Coordinate(i,k)).setBinError(j, timeResVsTrkDocaFitPars.get(new Coordinate(i,j)).error(k));
-            }       
-                    
+                 
         }
         
 //        for(int isec = 0; isec < 6; isec++) {
@@ -279,7 +282,12 @@ public class DocaSmearAnal extends AnalysisMonitor{
 //                timeResVsTrkDocaFitPars.get(new Coordinate(i)).value(4),
 //                0);
 //        }
-        
+        for(int k = 0; k<5; k++) {
+            parsVsBeta.get(new Coordinate(i,k)).setBinContent(j, timeResVsTrkDocaFitPars.get(new Coordinate(i,j)).value(k));
+            parsVsBeta.get(new Coordinate(i,k)).setBinError(j, timeResVsTrkDocaFitPars.get(new Coordinate(i,j)).error(k));
+            //if(k>0)
+            //    timeResVsTrkDocaFitPars.get(new Coordinate(i,j)).release(k);
+        } 
         
     }
     
@@ -333,7 +341,7 @@ public class DocaSmearAnal extends AnalysisMonitor{
             }
         }
     }
-
+    public static double[][] v0 = new double[6][6];
     int count = 0;
     public static int polarity =-1;
     @Override
@@ -355,6 +363,14 @@ public class DocaSmearAnal extends AnalysisMonitor{
             Constants.Load();
             polarity = (int)Math.signum(event.getBank("RUN::config").getFloat("torus",0));
             runNumber = newRun;
+            IndexedTable tab = DocaSmearAnalViewer.ccdb.getConstants(newRun, 
+                    "/calibration/dc/time_to_distance/time2dist");
+            for(int s = 0; s<6; s++ ){ // loop over sectors
+                for(int r = 0; r<6; r++ ){ //loop over slys
+                    // Fill constants
+                    v0[s][r] = tab.getDoubleValue("v0", s+1,r+1,0);
+                }
+            }
         }
         if(!event.hasBank("TimeBasedTrkg::TBHits")) {
             return;
@@ -388,11 +404,17 @@ public class DocaSmearAnal extends AnalysisMonitor{
         for (int i = 0; i < this.nsl; i++) {
             for (int j = 0; j < betaValues.length; j++) {
                 double[] pars = new double[parNames.length];
-                pars[0] = 2.902506e-02;
-                pars[1] = 2.884514e-02;
-                pars[2] = 1.298221e-01;
-                pars[3] = 1.981027e-01;
-                pars[4] = 0.0;
+                //a1 = 0.05 cm
+                //a2 = 0.02 cm
+                //a3 = 0.012 cm
+                //a4 = 0.1 cm
+                //scale_factor is nominally 1
+                //V0 (cm/ns) is gotten from CCDB
+                pars[0] = 1;
+                pars[1] = 0.05;
+                pars[2] = 0.02;
+                pars[3] = 0.012;
+                pars[4] = 0.1;
                 timeResVsTrkDocaFitPars.put(new Coordinate(i,j), new MnUserParameters());
                 for(int p = 0; p < parNames.length; p++) {
                     timeResVsTrkDocaFitPars.get(new Coordinate(i,j)).add(parNames[p], pars[p], errs[p]);
