@@ -144,7 +144,7 @@ public class WireIneffAnal extends AnalysisMonitor{
             for(int bb =0; bb<40; bb++) {
                 float ddc = effLayA[i][bb];
                 float ndc = totLayA[i][bb];
-                float errdc = (float) (Math.sqrt(ddc*(ddc/ndc+1))/ndc);
+                float errdc = (float) Math.sqrt(ndc*(ndc+ddc)/(ddc*ddc*ddc));
                 if(ndc>0) {
                     Ineffvstrkdocas
                     .get(new Coordinate(i))

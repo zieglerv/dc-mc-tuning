@@ -101,7 +101,7 @@ public class DocaSmearAnal extends AnalysisMonitor{
                 tr.addDataSet(timeResVsTrkDocaProf.get(new Coordinate(i,j)), 0);
                 timeResVsTrkDocaFits.put(new Coordinate(i,j), new FitLine());
                 timeResVsTrkDocaProf.get(new Coordinate(i,j)).setTitleX("norm. doca");
-                timeResVsTrkDocaProf.get(new Coordinate(i,j)).setTitleX("residual (cm)");
+                timeResVsTrkDocaProf.get(new Coordinate(i,j)).setTitleY("residual (cm)");
                 this.getDataGroup().add(tr, 0, i+1, j+1);
 
             }
